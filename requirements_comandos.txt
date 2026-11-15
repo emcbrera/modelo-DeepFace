@@ -1,0 +1,44 @@
+Package              Version
+-------------------  -------
+
+python               3.12.10
+deepface             0.0.100
+tensorflow           2.21.0
+keras                3.15.1
+numpy                2.5.3
+opencv-python        5.0.0.93
+pandas               3.0.5
+mtcnn                1.0.0
+retina-face          0.0.18
+Flask                3.1.3
+flask-cors           6.0.5
+gunicorn             26.2.0
+pillow               12.3.0
+requests             2.34.2
+python-dotenv        1.2.3
+
+# --- Comandos ejecutados al construir el microservicio (app/) ---
+
+# Paso 1: Estructura base del microservicio
+mkdir app
+# creados: app/__init__.py, app/config.py, .gitignore, .env.example, .env
+# TOKEN_API en .env generado con: python -c "import secrets; print(secrets.token_urlsafe(48))"
+
+# Paso 2: Lógica de negocio y endpoint
+# creados: app/auth.py, app/validador_expresion.py, app/routes.py, app/main.py
+
+# IMPORTANTE - dependencia faltante detectada al probar detector_backend='retinaface':
+# retina-face requiere el paquete puente tf-keras cuando se usa TensorFlow 2.21 + Keras 3,
+# si no está instalado, DeepFace.analyze() falla al importar con:
+#   ValueError: You have tensorflow 2.21.0 and this requires tf-keras package.
+pip install tf-keras
+
+# Congelar requirements.txt reflejando el venv real (incluye tf-keras y todas las
+# dependencias transitivas, para reproducibilidad exacta en el build de Docker)
+pip freeze > requirements.txt
+
+# Verificación manual del servicio completo (sin necesidad de correr el servidor):
+# python -c "from app.main import app; ..." usando app.test_client()
+# Casos probados: sin token (401), token inválido (401), sin campo 'foto' (400),
+# imagen sin rostro detectado (200, aprobado=false). Pendiente: probar con una foto
+# real de un rostro (neutral y con otra expresión) antes de dar el servicio por cerrado.
